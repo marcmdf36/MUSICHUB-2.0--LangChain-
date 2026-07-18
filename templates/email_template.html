@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400&display=swap');
+
+    /* ─── MOBILE ─── */
+    @media only screen and (max-width: 620px) {
+      .card-table    { width: 100% !important; border-radius: 0 !important; }
+      .content-cell  { padding: 24px 20px 16px !important; }
+      .outro-cell    { padding: 16px 20px 24px !important; }
+      .footer-cell   { padding: 16px 20px !important; }
+      .song-cell     { padding: 8px 16px 0 !important; }
+      .intro-text    { font-size: 15px !important; }
+      .song-title    { font-size: 14px !important; }
+      .song-meta     { font-size: 11px !important; }
+      .song-reason   { font-size: 12px !important; }
+    }
+
+    /* ─── DARK MODE ─── */
+    @media (prefers-color-scheme: dark) {
+      .email-body    { background-color: #1a0a2e !important; }
+      .outer-table   { background-color: #1a0a2e !important; }
+      .card-bg       { background-color: #2a1540 !important; }
+      .content-cell  { background-color: #2a1540 !important; }
+      .intro-text    { color: #e0d0f5 !important; }
+      .outro-text    { color: #c4a8e8 !important; }
+      .song-card     { background-color: #35185a !important; }
+      .song-title-a  { color: #e8d5ff !important; }
+      .song-meta-p   { color: #c4a8e8 !important; }
+      .song-reason-p { color: #d0baf0 !important; }
+      .footer-cell   { background-color: #1a0a2e !important; border-top: 1px solid #3d2060 !important; }
+      .footer-text   { color: #9c85b5 !important; }
+      .separator-td  { background-color: #4a2880 !important; }
+    }
+  </style>
+</head>
+<body class="email-body" style="margin:0; padding:0; background-color:#c8b8d8; font-family:'Lato', Georgia, serif;">
+
+  <!-- Outer wrapper -->
+  <table class="outer-table" width="100%" cellpadding="0" cellspacing="0"
+         style="background-color:#c8b8d8; padding:24px 0;">
+    <tr>
+      <td align="center">
+
+        <!-- Card -->
+        <table class="card-table" width="600" cellpadding="0" cellspacing="0"
+               style="max-width:600px; width:100%; background-color:#F5F0F7;
+                      border-radius:14px; overflow:hidden;
+                      box-shadow:0 4px 32px rgba(60,10,100,0.18);">
+
+          <!-- ─── HEADER: imagen con texto quemado ─── -->
+          <tr>
+            <td style="padding:0; line-height:0; font-size:0; background-color:#1a0a2e;">
+              <img src="https://res.cloudinary.com/des6hbng7/image/upload/v1779387955/header_yuxdo5.png"
+                   width="600" alt="MusicHub"
+                   style="display:block; width:100%; max-width:600px; height:auto;" />
+            </td>
+          </tr>
+
+          <!-- ─── INTRO ─── -->
+          <tr>
+            <td class="content-cell" style="padding:28px 32px 16px; background-color:#F5F0F7;">
+              <p class="intro-text"
+                 style="color:#2e1a44; font-size:15px; line-height:1.8; margin:0;
+                        font-family:'Lato', sans-serif; font-weight:300;">
+                {{intro}}
+              </p>
+            </td>
+          </tr>
+
+          <!-- ─── SEPARADOR ─── -->
+          <tr>
+            <td style="padding:0 32px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td class="separator-td" height="1"
+                      style="background-color:#d0b8f0; font-size:0; line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ─── CANCIONES ─── -->
+          {{songs_html}}
+
+          <!-- ─── SEPARADOR ─── -->
+          <tr>
+            <td style="padding:0 32px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td class="separator-td" height="1"
+                      style="background-color:#d0b8f0; font-size:0; line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ─── OUTRO ─── -->
+          <tr>
+            <td class="outro-cell" style="padding:20px 32px 28px; background-color:#F5F0F7;">
+              <p class="outro-text"
+                 style="color:#6b4d8a; font-size:14px; line-height:1.7; margin:0;
+                        font-style:italic; font-family:'Playfair Display', serif;">
+                {{outro}}
+              </p>
+            </td>
+          </tr>
+
+          <!-- ─── FOOTER ─── -->
+          <tr>
+            <td class="footer-cell"
+                style="background-color:#ede5f5; padding:16px 32px;
+                       text-align:center; border-top:1px solid #d8cce8;">
+              <p class="footer-text"
+                 style="color:#9c85b5; font-size:11px; margin:0;
+                        font-family:'Lato', sans-serif; letter-spacing:1.5px;
+                        text-transform:uppercase; font-weight:300;">
+                Para oídos exigentes &nbsp;·&nbsp; MusicHub
+              </p>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
