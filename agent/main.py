@@ -22,28 +22,10 @@ def run():
     candidates_text = format_candidates_for_llm(candidates)
     history_text = get_history_as_text()
 
-    # 3. El LLM selecciona y redacta
+    # 3. El LLM selecciona y redacta (ahora recibe mensajes de LangChain)
     print("🤖 El curador está eligiendo...")
-    prompt = build_prompt(candidates_text, history_text, SONGS_PER_DAY)
-    result = ask_llm(prompt)
-
-    # DEBUG - Después del paso 3 (LLM selecciona) 
-    print(f"\n🔎 DIAGNÓSTICO:")
-    print(f"   Candidatas de Spotify: {len(candidates)}")
-    print(f"   Selecciones del LLM: {len(result['selections'])}")
-
-    for selection in result["selections"]:
-        title = selection["title"]
-        artist = selection["artist"]
-        found = get_candidate_by_index(candidates, title, artist)
-        duplicate = is_duplicate(title, artist) if found else False
-        
-        if not found:
-            print(f"   ❌ NO ENCONTRADA en pool: {artist} - {title}")
-        elif duplicate:
-            print(f"   🔁 DUPLICADA en historial: {artist} - {title}")
-        else:
-            print(f"   ✅ OK: {artist} - {title}")
+    messages = build_prompt(candidates_text, history_text, SONGS_PER_DAY)
+    result = ask_llm(messages)
 
     # 4. Cruzar selecciones del LLM con datos reales de Spotify
     final_songs = []
