@@ -1,68 +1,60 @@
-from agent.config import SONGS_PER_DAY, GENRES
-from agent.prompts import build_prompt
-from agent.llm import ask_llm
-from agent.memory import get_history_as_text, save_recommendations, is_duplicate
-from agent.music_search import fetch_candidates, format_candidates_for_llm, get_candidate_by_index
-from agent.email_builder import build_email_html
-from agent.email_sender import send_email
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.messages import SystemMessage, HumanMessage
+from agent.config import GEMINI_API_KEY, LLM_MODEL, GENRES, SONGS_PER_DAY
+from agent.tools import all_tools
+
+# LLM con tools vinculadas
+llm = ChatGoogleGenerativeAI(
+    model=LLM_MODEL,
+    api_key=GEMINI_API_KEY,
+    temperature=1.0,
+)
+
+AGENT_INSTRUCTIONS = """
+Eres un curador musical experto con gusto ecléctico y profundo conocimiento
+de {genre_list}. Tienes la personalidad de un amigo melómano que siempre
+tiene recomendaciones increíbles.
+
+Tu flujo de trabajo es:
+1. Usa la herramienta search_music para obtener candidatas reales de Spotify.
+2. Usa la herramienta get_history para ver qué canciones ya recomendaste.
+3. Selecciona las {selections_count} mejores canciones del pool, siguiendo estos criterios:
+   - Variedad de géneros: no repitas género ni artista.
+   - Prioriza canciones interesantes, no las más populares.
+   - Equilibrio entre clásicos infravalorados y lanzamientos recientes.
+   - NO selecciones canciones del historial.
+4. Usa la herramienta save_and_send con un JSON que incluya:
+   - selections: título y artista EXACTOS del pool + razón con personalidad
+   - email_subject: asunto creativo con algún emoji
+   - email_intro: 1-2 frases de apertura con tono cercano
+   - email_outro: despedida breve con carácter propio
+
+IMPORTANTE: Los títulos y artistas deben coincidir EXACTAMENTE con el pool.
+El contenido del email debe estar en español.
+""".format(
+    genre_list=", ".join(GENRES),
+    selections_count=SONGS_PER_DAY + 3,
+)
 
 
 def run():
-    # 1. Spotify genera el pool de candidatas reales
-    print("🔍 Buscando candidatas en Spotify...")
-    candidates = fetch_candidates(GENRES, per_genre=10)
-    print(f"   Encontradas: {len(candidates)} canciones")
+    from langgraph.prebuilt import create_react_agent
 
+    agent = create_react_agent(
+        model=llm,
+        tools=all_tools,
+        prompt=AGENT_INSTRUCTIONS,
+    )
 
-    if not candidates:
-        print("❌ No se encontraron candidatas. Abortando.")
-        return
+    print("🤖 Agente iniciado...\n")
 
-    # 2. Preparar contexto
-    candidates_text = format_candidates_for_llm(candidates)
-    history_text = get_history_as_text()
+    result = agent.invoke(
+        {"messages": [HumanMessage(content="Genera las recomendaciones musicales del día y envía el email.")]}
+    )
 
-    # 3. El LLM selecciona y redacta (ahora recibe mensajes de LangChain)
-    print("🤖 El curador está eligiendo...")
-    messages = build_prompt(candidates_text, history_text, SONGS_PER_DAY)
-    result = ask_llm(messages)
-
-    # 4. Cruzar selecciones del LLM con datos reales de Spotify
-    final_songs = []
-    for selection in result["selections"]:
-        full_data = get_candidate_by_index(candidates, selection["title"], selection["artist"])
-        if full_data and not is_duplicate(full_data["title"], full_data["artist"]):
-            full_data["reason"] = selection["reason"]
-            final_songs.append(full_data)
-            if len(final_songs) >= SONGS_PER_DAY:
-                break
-
-    # 5. Guardar en la base de datos
-    save_recommendations(final_songs)
-
-    # 6. Construir y enviar email
-    if final_songs:
-        print("📧 Enviando email...")
-        html = build_email_html(
-            songs=final_songs,
-            intro=result.get("email_intro", ""),
-            outro=result.get("email_outro", ""),
-        )
-        success = send_email(result["email_subject"], html)
-        if success:
-            print("✅ Email enviado correctamente")
-        else:
-            print("❌ Fallo en el envío")
-    else:
-        print("⚠️ No hay canciones nuevas, no se envía email")
-
-    # 7. Resumen en consola
-    print(f"\n📋 Resumen: {len(final_songs)} canciones seleccionadas\n")
-    for song in final_songs:
-        print(f"  🎵 {song['artist']} - {song['title']} ({song['genre']}, {song['year']})")
-        # print(f"     → {song['reason']}")
-        # print(f"     🔗 {song['spotify_url']}")
-        # print()
+    # Mostrar el resultado final del agente
+    last_message = result["messages"][-1]
+    print(f"\n📋 Resultado del agente:\n{last_message.content}")
 
 
 if __name__ == "__main__":

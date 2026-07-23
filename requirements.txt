@@ -3,3 +3,4 @@ python-dotenv
 spotipy
 langchain
 langchain-google-genai
+langgraph
