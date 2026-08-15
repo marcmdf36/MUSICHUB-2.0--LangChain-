@@ -2,7 +2,7 @@ name: MusicHub
 
 on:
   schedule:
-    - cron: '0 4 * * *'  # Salta sobre las 9:30 Barcelona
+    - cron: '0 5 * * 1'  # Salta sobre las 9:30 Barcelona
   workflow_dispatch:      # Permite lanzarlo manualmente desde GitHub
 
 jobs:
